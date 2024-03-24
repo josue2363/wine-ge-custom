@@ -1,5 +1,5 @@
 [submodule "proton-wine"]
-	path = wine-valve
+	path = wine
 	url = https://github.com/ValveSoftware/wine.git
 [submodule "wine-staging"]
 	path = wine-staging
