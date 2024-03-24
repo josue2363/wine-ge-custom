@@ -1,5 +1,5 @@
 [submodule "proton-wine"]
-	path = proton-wine
+	path = wine-valve
 	url = http://github.com/gloriouseggroll/proton-wine/
 [submodule "wine-staging"]
 	path = wine-staging
