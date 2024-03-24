@@ -6,7 +6,7 @@
 
 ### (2) WINE PATCHING ###
 
-    pushd proton-wine
+    pushd wine-valve
     git reset --hard HEAD
     git clean -xdf
 
