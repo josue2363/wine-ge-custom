@@ -1,9 +1,9 @@
 [submodule "proton-wine"]
 	path = wine-valve
-	url = http://github.com/gloriouseggroll/proton-wine/
+	url = https://github.com/ValveSoftware/wine.git
 [submodule "wine-staging"]
 	path = wine-staging
-	url = https://github.com/wine-staging/wine-staging/
+	url = https://github.com/wine-staging/wine-staging.git
 [submodule "buildbot"]
-        path = buildbot
-        url = https://github.com/lutris/buildbot/
+	path = buildbot
+	url = https://github.com/lutris/buildbot/
