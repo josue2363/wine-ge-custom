@@ -1,21 +1,35 @@
+From eda0bee9e9916938fff6ef6813a1f33df1f93ef7 Mon Sep 17 00:00:00 2001
+From: Stelios Tsampas <loathingkernel@gmail.com>
+Date: Mon, 25 Mar 2024 09:52:56 +0200
+Subject: [PATCH] Uplay fsync wine hotfix
+
+---
+ dlls/ntdll/unix/loader.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
 diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
-index e0e5006f498..a3e885aef7c 100644
+index 993bd61b0..f8326d508 100644
 --- a/dlls/ntdll/unix/loader.c
 +++ b/dlls/ntdll/unix/loader.c
-@@ -2287,6 +2287,7 @@ BOOL simulate_writecopy;
+@@ -1907,6 +1907,8 @@ long long ram_reporting_bias;
+ 
  static void hacks_init(void)
  {
-     static const char upc_exe[] = "Ubisoft Game Launcher\\upc.exe";
++    static const char upc_exe[] = "Ubisoft Game Launcher\\upc.exe";
 +    static const char upc2_exe[] = "upc.exe";
-     const char *env_str, *sgi;
-
-
-@@ -2305,6 +2306,7 @@ static void hacks_init(void)
+     const char *sgi = getenv( "SteamGameId" );
+     const char *env_str;
+     if ((env_str = getenv("WINE_RAM_REPORTING_BIAS")))
+@@ -1929,7 +1931,8 @@ static void hacks_init(void)
+         fsync_simulate_sched_quantum = !!atoi(env_str);
      else if (main_argc > 1)
      {
-         fsync_simulate_sched_quantum = !!strstr(main_argv[1], upc_exe);
+-        fsync_simulate_sched_quantum = !!strstr(main_argv[1], "Ubisoft Game Launcher\\upc.exe");
++        fsync_simulate_sched_quantum = !!strstr(main_argv[1], upc_exe);
 +        fsync_simulate_sched_quantum = !!strstr(main_argv[1], upc2_exe);
          fsync_simulate_sched_quantum = fsync_simulate_sched_quantum || !!strstr(main_argv[1], "PlanetZoo.exe");
          fsync_simulate_sched_quantum = fsync_simulate_sched_quantum || !!strstr(main_argv[1], "GTA5.exe");
      }
+-- 
+2.44.0
 
