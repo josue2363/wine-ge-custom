@@ -281,13 +281,16 @@ revert_cmd() {
 ### (2-6) PROTON-GE ADDITIONAL CUSTOM PATCHES ###
 
     echo "WINE: -PROTON- Remove steamclient patches for normal WINE usage"
-    patch -Np1 < ../patches/proton/0001-De-steamify-proton-s-wine.patch
+    patch -Np1 < ../patches/proton/0001-De-steamify-proton-s-WINE-so-it-can-be-used-as-a-sta.patch
 
     echo "WINE: -PROTON- Fix non-steam controller input"
     patch -Np1 < ../patches/proton/fix-non-steam-controller-input.patch
 
     echo "WINE: -FSR- fullscreen hack fsr patch"
     patch -Np1 < ../patches/proton/47-proton-fshack-AMD-FSR-complete.patch
+
+    echo "WINE: -PENDING- Add options to disable proton media converter."
+    patch -Np1 < ../patches/wine-hotfixes/pending/add-envvar-to-gate-media-converter.patch
 
     #echo "WINE: -Nvidia Reflex- Support VK_NV_low_latency2"
     #patch -Np1 < ../patches/proton/83-nv_low_latency_wine.patch
