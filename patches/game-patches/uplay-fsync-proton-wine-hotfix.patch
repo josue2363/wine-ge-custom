@@ -1,7 +1,7 @@
 From eda0bee9e9916938fff6ef6813a1f33df1f93ef7 Mon Sep 17 00:00:00 2001
-From: Stelios Tsampas <loathingkernel@gmail.com>
-Date: Mon, 25 Mar 2024 09:52:56 +0200
-Subject: [PATCH] Uplay fsync wine hotfix
+From: GloriousEggroll <gloriouseggroll@gmail.com>
+Date: Mon, 04 May 2023 09:52:56 +0200
+Subject: [PATCH] ntdll: GAMEFIX: Uplay fsync wine hotfix
 
 ---
  dlls/ntdll/unix/loader.c | 5 ++++-
