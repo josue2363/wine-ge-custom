@@ -278,6 +278,13 @@ revert_cmd() {
     echo "WINE: -PENDING- Add TCP_KEEP patch (Star Citizen Launcher 2.0 fix)"
     patch -Np1 < ../patches/wine-hotfixes/pending/TCP_KEEP-fixup.patch
 
+    echo "WINE: -PENDING- shell32: Implement some file_operation apis. (Solo Leveling netmarble launcher)"
+    # https://gitlab.winehq.org/wine/wine/-/merge_requests/5671
+    patch -Np1 < ../patches/wine-hotfixes/pending/5671.patch
+
+    echo "WINE: -PENDING- ncrypt: NCryptDecrypt implementation (PSN Login for Ghost of Tsushima)"
+    patch -Np1 < ../patches/wine-hotfixes/pending/NCryptDecrypt_implementation.patch
+
 ### END WINE PENDING UPSTREAM SECTION ###
 
 
@@ -295,8 +302,8 @@ revert_cmd() {
     echo "WINE: -PENDING- Add options to disable proton media converter."
     patch -Np1 < ../patches/wine-hotfixes/pending/add-envvar-to-gate-media-converter.patch
 
-    #echo "WINE: -Nvidia Reflex- Support VK_NV_low_latency2"
-    #patch -Np1 < ../patches/proton/83-nv_low_latency_wine.patch
+    echo "WINE: -Nvidia Reflex- Support VK_NV_low_latency2"
+    patch -Np1 < ../patches/proton/83-nv_low_latency_wine.patch
 
 
 ### REGENERATE WINE FILES
