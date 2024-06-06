@@ -307,11 +307,11 @@ revert_cmd() {
 
 
 ### REGENERATE WINE FILES
-    # need to run these after applying patches
+    # need to run these after applying patches (order matters)
+    ./dlls/winevulkan/make_vulkan -x vk.xml
     ./tools/make_specfiles
     ./tools/make_requests
-    ./dlls/winevulkan/make_vulkan
-    autoreconf -f
+    autoreconf -fiv
 
     popd
 
