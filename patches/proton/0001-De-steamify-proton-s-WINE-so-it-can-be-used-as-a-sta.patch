@@ -1,4 +1,4 @@
-From 785f88d8870f2829acc9c32e865e81e9b98fc011 Mon Sep 17 00:00:00 2001
+From 40071c242ab1e39638fce7a29203fcfd78ac5c7e Mon Sep 17 00:00:00 2001
 From: Stelios Tsampas <loathingkernel@gmail.com>
 Date: Mon, 25 Mar 2024 00:54:57 +0200
 Subject: [PATCH] De-steamify proton's wine to be usable outside of Proton
@@ -10,19 +10,19 @@ Co-authored-by: GloriousEggroll <gloriouseggroll@gmail.com>
  dlls/ntdll/loader.c             |  38 +-----
  dlls/ntdll/unix/env.c           |   3 +-
  dlls/ntdll/unix/loader.c        | 128 +------------------
- dlls/ntdll/unix/signal_i386.c   |   7 -
- dlls/ntdll/unix/signal_x86_64.c |   7 -
+ dlls/ntdll/unix/signal_i386.c   |   7 --
+ dlls/ntdll/unix/signal_x86_64.c |   7 --
  dlls/ntdll/unix/unix_private.h  |   1 -
- dlls/ntdll/unixlib.h            |   7 -
- dlls/shell32/shellpath.c        | 219 +++++++++++++++++++++++++++-----
+ dlls/ntdll/unixlib.h            |   7 --
+ dlls/shell32/shellpath.c        | 216 ++++++++++++++++++++++++++------
  dlls/winex11.drv/window.c       |  15 +--
- loader/wine.inf.in              |  27 +---
+ loader/wine.inf.in              |  28 +----
  programs/wineboot/wineboot.c    |  33 +++++
  programs/winebrowser/main.c     |  16 ---
  programs/winedbg/debugger.h     |   2 -
  programs/winedbg/tgt_active.c   |  48 -------
  programs/winedbg/winedbg.c      |  10 +-
- 17 files changed, 242 insertions(+), 368 deletions(-)
+ 17 files changed, 240 insertions(+), 368 deletions(-)
 
 diff --git a/dlls/advapi32/advapi.c b/dlls/advapi32/advapi.c
 index 127cec57252..2284e92b263 100644
@@ -103,19 +103,19 @@ index 0898e30f603..6bd2f061113 100644
      cid.UniqueThread  = 0;
  
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index 554edd53658..d14d41b42e1 100644
+index 8dfe4e21e10..073eb2cd638 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -91,7 +91,7 @@ const WCHAR windows_dir[] = L"C:\\windows";
+@@ -90,7 +90,7 @@ const WCHAR windows_dir[] = L"C:\\windows";
  const WCHAR system_dir[] = L"C:\\windows\\system32\\";
  
  /* system search path */
 -static const WCHAR system_path[] = L"C:\\windows\\system32;C:\\windows\\system;C:\\windows;C:\\Program Files (x86)\\Steam";
 +static const WCHAR system_path[] = L"C:\\windows\\system32;C:\\windows\\system;C:\\windows";
  
- #define IS_OPTION_TRUE(ch) ((ch) == 'y' || (ch) == 'Y' || (ch) == 't' || (ch) == 'T' || (ch) == '1')
- 
-@@ -2327,19 +2327,6 @@ static NTSTATUS perform_relocations( void *module, IMAGE_NT_HEADERS *nt, SIZE_T
+ static BOOL is_prefix_bootstrap;  /* are we bootstrapping the prefix? */
+ static BOOL imports_fixup_done = FALSE;  /* set once the imports have been fixed up, before attaching them */
+@@ -2196,19 +2196,6 @@ static NTSTATUS perform_relocations( void *module, IMAGE_NT_HEADERS *nt, SIZE_T
      return STATUS_SUCCESS;
  }
  
@@ -135,7 +135,7 @@ index 554edd53658..d14d41b42e1 100644
  /*************************************************************************
   *		build_module
   *
-@@ -2350,16 +2337,12 @@ static NTSTATUS build_module( LPCWSTR load_path, const UNICODE_STRING *nt_name,
+@@ -2219,16 +2206,12 @@ static NTSTATUS build_module( LPCWSTR load_path, const UNICODE_STRING *nt_name,
                                DWORD flags, BOOL system, WINE_MODREF **pwm )
  {
      static const char builtin_signature[] = "Wine builtin DLL";
@@ -152,7 +152,7 @@ index 554edd53658..d14d41b42e1 100644
  
      if (!(nt = RtlImageNtHeader( *module ))) return STATUS_INVALID_IMAGE_FORMAT;
  
-@@ -2380,25 +2363,6 @@ static NTSTATUS build_module( LPCWSTR load_path, const UNICODE_STRING *nt_name,
+@@ -2249,25 +2232,6 @@ static NTSTATUS build_module( LPCWSTR load_path, const UNICODE_STRING *nt_name,
  
      update_load_config( *module );
  
@@ -192,7 +192,7 @@ index c2c46dd0a12..29f5aa2b17f 100644
      return 0;
  }
 diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
-index ae2f6e82410..749d3dbf3f5 100644
+index f8695a70deb..1c965027184 100644
 --- a/dlls/ntdll/unix/loader.c
 +++ b/dlls/ntdll/unix/loader.c
 @@ -592,47 +592,12 @@ NTSTATUS exec_wineloader( char **argv, int socketfd, const pe_image_info_t *pe_i
@@ -350,7 +350,7 @@ index ae2f6e82410..749d3dbf3f5 100644
      debugstr_pc,
  };
 diff --git a/dlls/ntdll/unix/signal_i386.c b/dlls/ntdll/unix/signal_i386.c
-index 018459dda23..a0eeadbc7b5 100644
+index faf09c05371..1751853bd1f 100644
 --- a/dlls/ntdll/unix/signal_i386.c
 +++ b/dlls/ntdll/unix/signal_i386.c
 @@ -1916,7 +1916,6 @@ static void segv_handler( int signal, siginfo_t *siginfo, void *sigcontext )
@@ -400,10 +400,10 @@ index be9af2c23d1..944bb0097b2 100644
          rec.ExceptionInformation[0] = (ERROR_sig(ucontext) >> 1) & 0x09;
          rec.ExceptionInformation[1] = (ULONG_PTR)siginfo->si_addr;
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index 39e095f4dcd..3e70227a105 100644
+index 2b62d5c7754..3c0bf2bab95 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -272,7 +272,6 @@ extern unsigned int alloc_object_attributes( const OBJECT_ATTRIBUTES *attr, stru
+@@ -265,7 +265,6 @@ extern unsigned int alloc_object_attributes( const OBJECT_ATTRIBUTES *attr, stru
                                               data_size_t *ret_len );
  extern NTSTATUS system_time_precise( void *args );
  
@@ -437,10 +437,10 @@ index e0870584a68..94abe3450b8 100644
      unix_debugstr_pc,
  };
 diff --git a/dlls/shell32/shellpath.c b/dlls/shell32/shellpath.c
-index c384919fdc2..634fd944ca0 100644
+index c384919fdc2..015d7cdd4e2 100644
 --- a/dlls/shell32/shellpath.c
 +++ b/dlls/shell32/shellpath.c
-@@ -2639,6 +2639,183 @@ end:
+@@ -2639,6 +2639,180 @@ end:
      return hr;
  }
  
@@ -461,20 +461,20 @@ index c384919fdc2..634fd944ca0 100644
 +        fmt = L"%s/.config/user-dirs.dirs";
 +    }
 +    len = lstrlenW(var) + lstrlenW(fmt);
-+    name = heap_alloc( len * sizeof(WCHAR) );
++    name = malloc( len * sizeof(WCHAR) );
 +    swprintf( name, len, fmt, var );
 +    name[1] = '\\';  /* change \??\ to \\?\ */
 +    for (ptr = name; *ptr; ptr++) if (*ptr == '/') *ptr = '\\';
 +
 +    file = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0 );
-+    heap_free( name );
++    free( name );
 +    if (file != INVALID_HANDLE_VALUE)
 +    {
 +        len = GetFileSize( file, NULL );
-+        if (!(xdg_config = heap_alloc( len + 1 ))) return TRUE;
++        if (!(xdg_config = malloc( len + 1 ))) return TRUE;
 +        if (!ReadFile( file, xdg_config, len, &xdg_config_len, NULL ))
 +        {
-+            heap_free( xdg_config );
++            free( xdg_config );
 +            xdg_config = NULL;
 +        }
 +        else
@@ -509,7 +509,7 @@ index c384919fdc2..634fd944ca0 100644
 +        p++;
 +        if (*p != '/' && strncmp( p, "$HOME/", 6 )) continue;
 +
-+        if (!(ret = heap_alloc( strlen(p) + 1 ))) break;
++        if (!(ret = malloc( strlen(p) + 1 ))) break;
 +        for (i = 0; *p && *p != '"'; i++, p++)
 +        {
 +            if (*p == '\\' && p[1]) p++;
@@ -518,7 +518,7 @@ index c384919fdc2..634fd944ca0 100644
 +        ret[i] = 0;
 +        if (*p != '"')
 +        {
-+            heap_free( ret );
++            free( ret );
 +            ret = NULL;
 +        }
 +        break;
@@ -532,7 +532,7 @@ index c384919fdc2..634fd944ca0 100644
 +    DWORD len = sizeof(*ioctl) + path->Length + strlen(link) + 1;
 +    BOOL ret;
 +
-+    if (!(ioctl = heap_alloc( len ))) return FALSE;
++    if (!(ioctl = malloc( len ))) return FALSE;
 +    ioctl->create_backup = FALSE;
 +    ioctl->folder_offset = sizeof(*ioctl);
 +    ioctl->folder_size = path->Length;
@@ -541,7 +541,7 @@ index c384919fdc2..634fd944ca0 100644
 +    strcpy( (char *)ioctl + ioctl->symlink_offset, link );
 +
 +    ret = DeviceIoControl( mgr, IOCTL_MOUNTMGR_DEFINE_SHELL_FOLDER, ioctl, len, NULL, 0, NULL, NULL );
-+    heap_free( ioctl );
++    free( ioctl );
 +    return ret;
 +}
 +
@@ -572,14 +572,11 @@ index c384919fdc2..634fd944ca0 100644
 +    {
 +        if (link_folder( mgr, &nt_name, target )) goto done;
 +    }
-+    if (link_folder( mgr, &nt_name, default_name )) goto done;
-+
-+    /* fall back to HOME */
-+    link_folder( mgr, &nt_name, "$HOME" );
++    link_folder( mgr, &nt_name, default_name );
 +
 +done:
 +    RtlFreeUnicodeString( &nt_name );
-+    heap_free( target );
++    free( target );
 +    CloseHandle( mgr );
 +}
 +
@@ -624,7 +621,7 @@ index c384919fdc2..634fd944ca0 100644
  /******************************************************************************
   * SHGetFolderPathW			[SHELL32.@]
   *
-@@ -2827,6 +3004,10 @@ HRESULT WINAPI SHGetFolderPathAndSubDirW(
+@@ -2827,6 +3001,10 @@ HRESULT WINAPI SHGetFolderPathAndSubDirW(
          goto end;
      }
  
@@ -635,7 +632,7 @@ index c384919fdc2..634fd944ca0 100644
      /* create directory/directories */
      ret = SHCreateDirectoryExW(hwndOwner, szBuildPath, NULL);
      if (ret && ret != ERROR_ALREADY_EXISTS)
-@@ -2881,8 +3062,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
+@@ -2881,8 +3059,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
   LPCWSTR szUserShellFolderPath, LPCWSTR szShellFolderPath, const UINT folders[],
   UINT foldersLen)
  {
@@ -644,7 +641,7 @@ index c384919fdc2..634fd944ca0 100644
      const WCHAR *szValueName;
      WCHAR buffer[40];
      UINT i;
-@@ -2891,7 +3070,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
+@@ -2891,7 +3067,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
      HKEY hUserKey = NULL, hKey = NULL;
      DWORD dwType, dwPathLen;
      LONG ret;
@@ -652,7 +649,7 @@ index c384919fdc2..634fd944ca0 100644
  
      TRACE("%p,%p,%s,%p,%u\n", hRootKey, hToken,
       debugstr_w(szUserShellFolderPath), folders, foldersLen);
-@@ -2905,12 +3083,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
+@@ -2905,12 +3080,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
          if (ret)
              hr = HRESULT_FROM_WIN32(ret);
      }
@@ -665,7 +662,7 @@ index c384919fdc2..634fd944ca0 100644
      for (i = 0; SUCCEEDED(hr) && i < foldersLen; i++)
      {
          dwPathLen = MAX_PATH * sizeof(WCHAR);
-@@ -2923,10 +3095,9 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
+@@ -2923,10 +3092,9 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
              szValueName = &buffer[0];
          }
  
@@ -679,7 +676,7 @@ index c384919fdc2..634fd944ca0 100644
          {
              *path = '\0';
              if (CSIDL_Data[folders[i]].type == CSIDL_Type_User)
-@@ -2967,11 +3138,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
+@@ -2967,11 +3135,6 @@ static HRESULT _SHRegisterFolders(HKEY hRootKey, HANDLE hToken,
               hToken, SHGFP_TYPE_DEFAULT, path);
          }
      }
@@ -691,7 +688,7 @@ index c384919fdc2..634fd944ca0 100644
      if (hUserKey)
          RegCloseKey(hUserKey);
      if (hKey)
-@@ -3112,23 +3278,6 @@ static HRESULT create_extra_folders(void)
+@@ -3112,23 +3275,6 @@ static HRESULT create_extra_folders(void)
          hr = SHGetFolderPathAndSubDirW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL,
                                         SHGFP_TYPE_DEFAULT, L"Microsoft\\Windows\\Themes", path);
      }
@@ -742,10 +739,10 @@ index 98723a302ed..68889e470cd 100644
          XFree( class_hints );
      }
 diff --git a/loader/wine.inf.in b/loader/wine.inf.in
-index 13929f66a26..fd66a4c6d47 100644
+index 1f4019cc417..d4e084d6b48 100644
 --- a/loader/wine.inf.in
 +++ b/loader/wine.inf.in
-@@ -100,8 +100,7 @@ AddReg=\
+@@ -98,8 +98,7 @@ AddReg=\
      VersionInfo,\
      LicenseInformation,\
      NVIDIANGX, \
@@ -755,7 +752,7 @@ index 13929f66a26..fd66a4c6d47 100644
  
  [DefaultInstall.ntamd64]
  RegisterDlls=RegisterDllsSection
-@@ -130,8 +129,7 @@ AddReg=\
+@@ -127,8 +126,7 @@ AddReg=\
      VersionInfo,\
      LicenseInformation,\
      NVIDIANGX, \
@@ -765,7 +762,7 @@ index 13929f66a26..fd66a4c6d47 100644
  
  [DefaultInstall.ntarm64]
  RegisterDlls=RegisterDllsSection
-@@ -176,8 +174,7 @@ AddReg=\
+@@ -172,8 +170,7 @@ AddReg=\
      VersionInfo,\
      LicenseInformation,\
      NVIDIANGX, \
@@ -775,7 +772,7 @@ index 13929f66a26..fd66a4c6d47 100644
  
  [Wow64Install.ntarm]
  RegisterDlls=RegisterDllsSection
-@@ -355,7 +352,6 @@ HKCR,ftp\shell\open\command,,2,"""%11%\winebrowser.exe"" ""%1"""
+@@ -351,7 +348,6 @@ HKCR,ftp\shell\open\command,,2,"""%11%\winebrowser.exe"" ""%1"""
  HKCR,http\shell\open\command,,2,"""%11%\winebrowser.exe"" ""%1"""
  HKCR,https\shell\open\command,,2,"""%11%\winebrowser.exe"" ""%1"""
  HKCR,mailto\shell\open\command,,2,"""%11%\winebrowser.exe"" ""%1"""
@@ -783,7 +780,7 @@ index 13929f66a26..fd66a4c6d47 100644
  
  [ContentIndex]
  HKLM,System\CurrentControlSet\Control\ContentIndex\Language\Neutral,"WBreakerClass",,"{369647e0-17b0-11ce-9950-00aa004bbb1f}"
-@@ -470,7 +466,6 @@ HKLM,%CurrentVersionNT%\AeDebug,"Debugger",2,"winedbg --auto %ld %ld"
+@@ -466,7 +462,6 @@ HKLM,%CurrentVersionNT%\AeDebug,"Debugger",2,"winedbg --auto %ld %ld"
  HKLM,%CurrentVersionNT%\AeDebug,"Auto",2,"1"
  HKCU,Software\Wine\Debug,"RelayExclude",2,"ntdll.RtlEnterCriticalSection;ntdll.RtlTryEnterCriticalSection;ntdll.RtlLeaveCriticalSection;kernel32.48;kernel32.49;kernel32.94;kernel32.95;kernel32.96;kernel32.97;kernel32.98;kernel32.TlsGetValue;kernel32.TlsSetValue;kernel32.FlsGetValue;kernel32.FlsSetValue;kernel32.SetLastError"
  HKCU,Software\Wine\Debug,"RelayFromExclude",2,"winex11.drv;winemac.drv;user32;gdi32;advapi32;kernel32"
@@ -791,7 +788,15 @@ index 13929f66a26..fd66a4c6d47 100644
  
  [DirectX]
  HKLM,Software\Microsoft\DirectX,"Version",,"4.09.00.0904"
-@@ -3050,22 +3045,6 @@ InfFiles  = 17
+@@ -2607,6 +2602,7 @@ StartType=3
+ ErrorControl=1
+ 
+ [Services]
++HKLM,%CurrentVersion%\RunServices,"winemenubuilder",2,"%11%\winemenubuilder.exe -a -r"
+ HKLM,"System\CurrentControlSet\Services\Eventlog\Application",,16
+ HKLM,"System\CurrentControlSet\Services\Eventlog\System","Sources",0x10000,""
+ HKLM,"System\CurrentControlSet\Services\Tcpip\Parameters","DataBasePath",,"%12%\etc"
+@@ -2820,22 +2816,6 @@ InfFiles  = 17
  NlsFiles  = 11
  SortFiles = 10,globalization\sorting
  
@@ -815,10 +820,10 @@ index 13929f66a26..fd66a4c6d47 100644
  HKLM,Software\NVIDIA Corporation\Global\NGXCore,"FullPath",,"C:\Windows\System32"
  
 diff --git a/programs/wineboot/wineboot.c b/programs/wineboot/wineboot.c
-index dbc7b94acd8..8ba20629805 100644
+index ff6bd6cc38c..7164af35172 100644
 --- a/programs/wineboot/wineboot.c
 +++ b/programs/wineboot/wineboot.c
-@@ -1569,6 +1569,37 @@ static BOOL start_services_process(void)
+@@ -1461,6 +1461,37 @@ static BOOL start_services_process(void)
      return TRUE;
  }
  
@@ -835,10 +840,10 @@ index dbc7b94acd8..8ba20629805 100644
 +            SendDlgItemMessageW( hwnd, IDC_WAITICON, STM_SETICON, (WPARAM)icon, 0 );
 +            SendDlgItemMessageW( hwnd, IDC_WAITTEXT, WM_GETTEXT, 1024, (LPARAM)text );
 +            len = lstrlenW(text) + lstrlenW(name) + 1;
-+            buffer = HeapAlloc( GetProcessHeap(), 0, len * sizeof(WCHAR) );
++            buffer = malloc( len * sizeof(WCHAR) );
 +            swprintf( buffer, len, text, name );
 +            SendDlgItemMessageW( hwnd, IDC_WAITTEXT, WM_SETTEXT, 0, (LPARAM)buffer );
-+            HeapFree( GetProcessHeap(), 0, buffer );
++            free( buffer );
 +        }
 +        break;
 +    }
@@ -856,7 +861,7 @@ index dbc7b94acd8..8ba20629805 100644
  static HANDLE start_rundll32( const WCHAR *inf_path, const WCHAR *install, WORD machine )
  {
      WCHAR app[MAX_PATH + ARRAY_SIZE(L"\\rundll32.exe" )];
-@@ -1768,6 +1799,7 @@ static void update_wineprefix( BOOL force )
+@@ -1660,6 +1691,7 @@ static void update_wineprefix( BOOL force )
  
          if ((process = start_rundll32( inf_path, L"PreInstall", IMAGE_FILE_MACHINE_TARGET_HOST )))
          {
@@ -864,7 +869,7 @@ index dbc7b94acd8..8ba20629805 100644
              for (;;)
              {
                  if (process)
-@@ -1788,6 +1820,7 @@ static void update_wineprefix( BOOL force )
+@@ -1680,6 +1712,7 @@ static void update_wineprefix( BOOL force )
                      process = start_rundll32( inf_path, L"Wow64Install", machines[count].Machine );
                  count++;
              }
