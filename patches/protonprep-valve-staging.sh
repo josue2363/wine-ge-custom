@@ -100,7 +100,8 @@ revert_cmd() {
     -W odbc-remove-unixodbc \
     -W winedevice-Default_Drivers \
     -W winex11-Fixed-scancodes \
-    -W ntdll-RtlQueryPackageIdentity
+    -W ntdll-RtlQueryPackageIdentity \
+    -W d3dx9_36-DDS
 
     # NOTE: Some patches are applied manually because they -do- apply, just not cleanly, ie with patch fuzz.
     # A detailed list of why the above patches are disabled is listed below:
@@ -174,6 +175,7 @@ revert_cmd() {
     # mfplat-streaming-support -- interferes with proton's mfplat -- currently also disabled in upstream staging
     # wined3d-SWVP-shaders -- interferes with proton's wined3d -- currently also disabled in upstream staging
     # wined3d-Indexed_Vertex_Blending -- interferes with proton's wined3d -- currently also disabled in upstream staging
+    # d3dx9_36-DDS - incompatible with upstream proton 7/27/24
 
     echo "WINE: -STAGING- loader-KeyboardLayouts manually applied"
     patch -Np1 < ../patches/wine-hotfixes/staging/loader-KeyboardLayouts/0001-loader-Add-Keyboard-Layouts-registry-enteries.patch
@@ -248,6 +250,9 @@ revert_cmd() {
 
     echo "WINE: -GAME FIXES- add file search workaround hack for Phantasy Star Online 2 (WINE_NO_OPEN_FILE_SEARCH)"
     patch -Np1 < ../patches/game-patches/pso2_hack.patch
+
+    echo "WINE: -GAME FIXES- add xinput support to Dragon Age Inquisition"
+    patch -Np1 < ../patches/game-patches/dai_xinput.patch
 
     echo "WINE: -GAME FIXES- Fix Uplay not launching with fsync enabled after converting proton-wine to wine-ge"
     patch -Np1 < ../patches/game-patches/uplay-fsync-proton-wine-hotfix.patch
