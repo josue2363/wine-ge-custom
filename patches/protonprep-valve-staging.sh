@@ -267,6 +267,9 @@ revert_cmd() {
     echo "WINE: -GAME FIXES- add xinput support to Dragon Age Inquisition"
     patch -Np1 < ../patches/game-patches/dai_xinput.patch
 
+    echo "WINE: -GAME FIXES- add __TRY/__EXCEPT_PAGE_FAULT wnsprintfA xDefiant patch because of a bad arg passed by the game that would exit to desktop"
+    patch -Np1 < ../patches/game-patches/xdefiant.patch
+
     echo "WINE: -GAME FIXES- Fix Uplay not launching with fsync enabled after converting proton-wine to wine-ge"
     patch -Np1 < ../patches/game-patches/uplay-fsync-proton-wine-hotfix.patch
 
