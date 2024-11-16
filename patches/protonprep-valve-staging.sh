@@ -308,7 +308,7 @@ revert_cmd() {
     patch -Np1 < ../patches/proton/0001-De-steamify-proton-s-WINE-so-it-can-be-used-as-a-sta.patch
 
     echo "WINE: -PROTON- Fix non-steam controller input"
-    patch -Np1 < ../patches/proton/fix-non-steam-controller-input.patch
+    patch -Np1 < ../patches/proton/0001-wine.inf-fix-non-steam-controller-input.patch
 
     echo "WINE: -FSR- fullscreen hack fsr patch"
     patch -Np1 < ../patches/proton/47-proton-fshack-AMD-FSR-complete.patch
@@ -321,6 +321,15 @@ revert_cmd() {
 
     echo "WINE: -CUSTOM- Downgrade MESSAGE to TRACE to remove write_watches spam"
     patch -Np1 < ../patches/proton/0001-ntdll-Downgrade-using-kernel-write-watches-from-MESS.patch
+
+    echo "WINE: -CUSTOM- Disable window manager decorations for Wine windows by default, fixes focus loss with borderless fullscreen"
+    patch -Np1 < ../patches/proton/0001-winex11.drv-disable-wm-decorations-by-default.patch
+
+    echo "WINE: -CUSTOM- Do not create symlinks to home directory folders if WINEUSERSANDBOX=1"
+    patch -Np1 < ../patches/proton/0001-shell32-Add-WINEUSERSANDBOX-environment-variable.patch
+
+    echo "WINE: -CUSTOM- Set custom wm class through WINE_WMCLASS=<class>"
+    patch -Np1 < ../patches/proton/0001-winex11.drv-Add-the-ability-to-set-custom-wmclass-fo.patch
 
 ### REGENERATE WINE FILES
     # need to run these after applying patches (order matters)
