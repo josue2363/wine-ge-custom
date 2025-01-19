@@ -56,7 +56,7 @@ index fd5d5137d3e..2c79620ebe6 100644
  HKLM,Software\Wow6432Node\lucasarts entertainment company llc\Star Wars: Episode I Racer\v1.0,"Display Width",0x10001,640
 +
 +[WineDecorateWindows]
-+HKCU,Software\Wine\AppDefaults\DarkSoulsIII.exe\X11 Driver,"Decorated",,"N"
++HKCU,Software\Wine\X11 Driver,"Decorated",,"N"
 diff --git a/programs/winecfg/x11drvdlg.c b/programs/winecfg/x11drvdlg.c
 index aea52717a78..0a7cb1b2a91 100644
 --- a/programs/winecfg/x11drvdlg.c
