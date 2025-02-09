@@ -328,8 +328,14 @@ revert_cmd() {
     echo "WINE: -CUSTOM- Fix wine bug #56653 - GetLogicalProcessorInformation can be missing Cache information"
     patch -Np1 < ../patches/wine-hotfixes/pending/wine-bug-56653.patch
 
+    echo "WINE: -CUSTOM- Add WINE_NO_WM_DECORATION option to disable window decorations so that borders behave properly"
+    patch -Np1 < ../patches/proton/WINE_NO_WM_DECORATION.patch
+
     echo "WINE: -CUSTOM- Disable window manager decorations for Wine windows by default, fixes focus loss with borderless fullscreen"
     patch -Np1 < ../patches/proton/0001-winex11.drv-disable-wm-decorations-by-default.patch
+
+    echo "WINE: -CUSTOM- Add PROTON_PREFER_SDL option to make it not prefer hidraw and instead expose both sdl and hidraw"
+    patch -Np1 < ../patches/proton/PREFER_SDL.patch
 
     echo "WINE: -CUSTOM- Do not create symlinks to home directory folders if WINEUSERSANDBOX=1"
     patch -Np1 < ../patches/proton/0001-shell32-Add-WINEUSERSANDBOX-environment-variable.patch
