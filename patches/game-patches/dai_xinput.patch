@@ -1,4 +1,4 @@
-From 02a804ceb9ad18c366711b1a08ff0e9e157b44da Mon Sep 17 00:00:00 2001
+From 4fd6c1a286dd2babd098decf045522be1dff5656 Mon Sep 17 00:00:00 2001
 From: Cameron Moore <moore.cameron1111@gmail.com>
 Date: Sat, 3 Feb 2024 21:21:50 -0500
 Subject: [PATCH] user32: [GAMEFIX] Fix xinput support for Dragon Age
@@ -43,15 +43,15 @@ user32: [GAMEFIX] 2/2 Dragon Age Inquisition: fix xinput support
 
 Wrap hack with a SteamGameId check and cache it.
 ---
- dlls/user32/input.c | 26 +++++++++++++++++++++++++-
- dlls/win32u/input.c | 41 +++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 66 insertions(+), 1 deletion(-)
+ dlls/user32/input.c | 22 +++++++++++++++++++++-
+ dlls/win32u/input.c | 37 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 58 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/user32/input.c b/dlls/user32/input.c
-index f91b65a5f56..ce2d5f72730 100644
+index f91b65a5f56..dda952262ac 100644
 --- a/dlls/user32/input.c
 +++ b/dlls/user32/input.c
-@@ -814,8 +814,32 @@ HWND WINAPI GetActiveWindow(void)
+@@ -814,8 +814,28 @@ HWND WINAPI GetActiveWindow(void)
  HWND WINAPI GetFocus(void)
  {
      GUITHREADINFO info;
@@ -65,19 +65,15 @@ index f91b65a5f56..ce2d5f72730 100644
 +
 +    retValueWindow = NtUserGetGUIThreadInfo( GetCurrentThreadId(), &info ) ? info.hwndFocus : 0;
 +
-+    if (is_DragonAgeInquis != 0)
++    if (is_DragonAgeInquis)
 +    {
-+        if ((is_DragonAgeInquis == 1) || ((sgi = getenv("SteamGameId")) && !strcmp(sgi, "1222690")))
++        if ((is_DragonAgeInquis == 1) ||
++            (is_DragonAgeInquis = ((sgi = getenv("SteamGameId")) && !strcmp(sgi, "1222690"))))
 +        {
-+            is_DragonAgeInquis = 1;
 +            if (retValueWindow == 0 && prev != 0)
 +                NtUserAttachThreadInput(0, 0, 1);
 +            else
 +                prev = retValueWindow;
-+        }
-+        else
-+        {
-+            is_DragonAgeInquis = 0;
 +        }
 +    }
 +
@@ -86,7 +82,7 @@ index f91b65a5f56..ce2d5f72730 100644
  
  
 diff --git a/dlls/win32u/input.c b/dlls/win32u/input.c
-index 6268c978dab..f140c915eda 100644
+index 6268c978dab..1dbb6690c03 100644
 --- a/dlls/win32u/input.c
 +++ b/dlls/win32u/input.c
 @@ -30,6 +30,8 @@
@@ -98,7 +94,7 @@ index 6268c978dab..f140c915eda 100644
  #include "ntstatus.h"
  #define WIN32_NO_STATUS
  #include "win32u_private.h"
-@@ -596,6 +598,45 @@ HWND get_focus(void)
+@@ -596,6 +598,41 @@ HWND get_focus(void)
  BOOL WINAPI NtUserAttachThreadInput( DWORD from, DWORD to, BOOL attach )
  {
      BOOL ret;
@@ -111,11 +107,11 @@ index 6268c978dab..f140c915eda 100644
 +    static int is_DragonAgeInquis = -1;
 +    const char *sgi;
 +
-+    if (is_DragonAgeInquis != 0)
++    if (is_DragonAgeInquis)
 +    {
-+        if ((is_DragonAgeInquis == 1) || ((sgi = getenv("SteamGameId")) && !strcmp(sgi, "1222690")))
++        if ((is_DragonAgeInquis == 1) ||
++            (is_DragonAgeInquis = ((sgi = getenv("SteamGameId")) && !strcmp(sgi, "1222690"))))
 +        {
-+            is_DragonAgeInquis = 1;
 +            prctl(PR_GET_NAME, processNameForHack);
 +            TRACE("Process Name: %s\n", processNameForHack);
 +            if (strncmp(DAIprocessName, processNameForHack, 15) == 0 || strncmp(DAIGameLoopName, processNameForHack, 8) == 0)
@@ -135,10 +131,6 @@ index 6268c978dab..f140c915eda 100644
 +                    to = toThreadForHack;
 +                }
 +            }
-+        }
-+        else
-+        {
-+            is_DragonAgeInquis = 0;
 +        }
 +    }
  
